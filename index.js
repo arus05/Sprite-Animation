@@ -1,9 +1,14 @@
 //imports
+import animations from "./data/animations.js";
 import animationStates from "./data/animationStates.js";
 
-//Set event listeners
+//grab elements
 const toggleBtn = document.getElementById("toggle-btn");
+const animationSelector = document.getElementById("animations");
+
+//Set event listeners
 toggleBtn.addEventListener("click", toggleAnimation);
+animationSelector.addEventListener("change", changeAnimation);
 
 //Sprite information
 const spriteWidth = 575;
@@ -22,42 +27,64 @@ const spriteSheet = new Image();
 spriteSheet.src = "spritesheet.png";
 
 //animate the images
-let frameX = 0;
-let frameY = 4;
-let staggerFrames = 5;
+let frameX;
+let frameY;
+let staggerFrames = 8;
 let gameFrame = 0;
-let animationFrame;
-function animate(){
+let animationFrame; //store return value of request/cancelAnimationFrame
+
+//current animation
+let animation;
+let animationFrames;
+let numFrames;
+
+function animate(animationName){
+  if (gameFrame === 0){
+    animation = animations.find(animation=>{
+      return animation.name === animationName;
+    })
+    animationFrames = animation.frames;
+    frameY = animationFrames[0].y;
+    numFrames = animation.frames.length;
+  }
+
   ctx.clearRect(0, 0, canvas.height, canvas.width);
-  ctx.drawImage(spriteSheet, frameX*spriteWidth, frameY*spriteHeight, spriteWidth, spriteHeight, 0, 0, spriteWidth, spriteHeight);
-  if(frameX < 6){
-    if(gameFrame % staggerFrames === 0) frameX++;
-  }
-  else{
-    frameX = 0; 
-  }
+
+  frameX = animationFrames[Math.floor(gameFrame/staggerFrames) % numFrames].x;
+
+  ctx.drawImage(spriteSheet, frameX,
+    frameY, spriteWidth, spriteHeight,
+    0, 0, spriteWidth, spriteHeight);
+
+
+
   gameFrame++;
   animationFrame = requestAnimationFrame(animate);
 }
 
+//toggle animation
 function toggleAnimation(){
   if(animationFrame){
-    console.log(animationFrame);
     stopAnimation();
   }
   else{
-    console.log(animationFrame);
-    startAnimation();
+    startAnimation(animationSelector.value);
   }
 }
 
 //clear screen
 function stopAnimation(){
   animationFrame = cancelAnimationFrame(animationFrame);
-  ctx.clearRect(0, 0,  canvas.width, canvas.height)
+  ctx.clearRect(0, 0,  canvas.width, canvas.height);
+  gameFrame = 0;
 }
 
 //start animation
-function startAnimation(){
-  animate();
+function startAnimation(animationName){
+  animate(animationName);
+}
+
+function changeAnimation(){
+  stopAnimation();
+  startAnimation(animationSelector.value);
 }

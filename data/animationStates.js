@@ -1,7 +1,7 @@
 const animationStates = [
   {
     name: "idle",
-    frame: 7
+    frames: 7
   },
   {
     name: "jump",
